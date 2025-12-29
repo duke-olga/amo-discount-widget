@@ -1,11 +1,8 @@
 {
     "widget":{
-        "name":"MyWidget",
-        "short_description":"Short description",
-        "description":"Full description",
-        "tour_description":"Tour description"
-    },
-    "advanced":{
-        "title":"Settings menu item title"
+        "name":"Promotions / Discounts",
+        "short_description":"Applying promotions and discounts in the deal card",
+        "description":"The widget allows sales managers to apply pre-configured promotions and discounts to the deal budget directly from the amoCRM deal card. Fixed, percentage, and conditional discounts are supported with automatic recalculation of the budget and saving of the result in the deal.",
+        "tour_description":"Use the widget for quick and correct application of discounts. The widget automatically calculates the new deal budget and saves information about the applied promotion in the note."
     }
 }

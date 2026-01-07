@@ -27,5 +27,12 @@
       ]
     },
     "tour_description": "widget.tour_description"
+  },
+    "settings": {
+    "placeholder_field": {
+      "name": "settings.placeholder_field",
+      "type": "text",
+      "required": false
+    }
   }
 }

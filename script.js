@@ -47,12 +47,20 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       render: function () {
         self.log.info('✓ render callback called');
         try {
-          self.log.debug('Widget code:', self.get_settings().widget_code);
           self.log.debug('Widget params:', self.params);
           self.log.debug('Widget settings:', self.get_settings());
         } catch (e) {
           self.log.traceError(e, 'Ошибка при рендере виджета');
         }
+
+        self.render_template({
+          caption: {
+            class_name: 'discount-widget-caption'
+          },
+          body: '<div class="discount-widget-body">Привет! Я виджет скидок.</div>',
+          render: ''
+        });
+
         return true;
       },
       bind_actions: function() {
@@ -61,6 +69,21 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       },
       init: function() {
         self.log.info('✓ init callback called');
+        try {
+          var cssUrl = self.params.path + '/style.css?v=' + self.params.version;
+
+          if ($('link[href="' + cssUrl + '"]').length === 0) {
+            $('head').append(
+              '<link rel="stylesheet" type="text/css" href="' + cssUrl + '">'
+            );
+            self.log.info('CSS подключён:', cssUrl);
+          } else {
+            self.log.debug('CSS уже подключён');
+          }
+        } catch (e) {
+          self.log.traceError(e, 'Ошибка подключения CSS');
+        }
+
         if (!self.params.id) {
           self.log.warn('Параметр id не задан — фильтрация логов будет невозможна');
         }

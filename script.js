@@ -53,13 +53,22 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
           self.log.traceError(e, 'Ошибка при рендере виджета');
         }
 
-        self.render_template({
-          caption: {
-            class_name: 'discount-widget-caption'
-          },
-          body: '<div class="discount-widget-body">Привет! Я виджет скидок.</div>',
-          render: ''
+        self.render({
+          href: '/templates/card.twig',
+          base_path: self.params.path,
+          v: self.get_version(),
+          load: function (template) {
+            var bodyHtml = template.render();
+            self.render_template({
+              caption: {
+                class_name: 'discount-widget-caption'
+              },
+              body: bodyHtml,
+              render: ''
+            });
+          }
         });
+
         return true;
       },
       bind_actions: function() {

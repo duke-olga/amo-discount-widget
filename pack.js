@@ -24,7 +24,7 @@ try {
     const zip = new AdmZip();
 
     // 2. Добавляем папки (i18n, images)
-    const foldersToAdd = ["i18n", "images"];
+    const foldersToAdd = ["i18n", "images","templates"];
     foldersToAdd.forEach(folder => {
         if (fs.existsSync(folder)) {
             zip.addLocalFolder(folder, folder);

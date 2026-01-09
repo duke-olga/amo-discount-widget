@@ -53,12 +53,18 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
           self.log.traceError(e, 'Ошибка при рендере виджета');
         }
 
+
         self.render({
           href: '/templates/card.twig',
           base_path: self.params.path,
           v: self.get_version(),
           load: function (template) {
-            var bodyHtml = template.render();
+            var bodyHtml = template.render({
+              deal_name: 'Загрузка...',
+              deal_price: '...',
+              client_name: '...',
+              client_source: '...'
+            });
             self.render_template({
               caption: {
                 class_name: 'discount-widget-caption'
@@ -77,6 +83,7 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       },
       init: function() {
         self.log.info('✓ init callback called');
+        // подключение CSS
         try {
           var cssUrl = self.params.path + '/style.css?v=' + self.params.version;
 
@@ -111,11 +118,16 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
               }).done(function (response) {
                 self.log.info('Данные сделки получены');
                 self.log.debug('Данные сделки:', response);
+                self.dealData = response;
 
                 var currentLead = response;
                 var dealId = currentLead.id;
+                var dealName = response.name || 'Без названия';
                 var dealPrice = currentLead.price;
-                self.log.info('ID сделки:', dealId, 'Бюджет:', dealPrice);
+                self.log.info('ID сделки:', dealId,'Название сделки:', dealName, 'Бюджет:', dealPrice);
+
+                $('#w-deal-name').text(dealName);
+                $('#w-deal-price').text(dealPrice);
 
                 if (response._embedded && response._embedded.contacts.length > 0){
                   var contactId = response._embedded.contacts[0].id;
@@ -126,6 +138,11 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
                     method: 'GET'
                   }).done(function (contactData) {
                     self.log.info('Ответ по контакту получен:', contactData);
+                    self.contactData = contactData;
+
+                    var clientName = contactData.name || 'Не указан';
+                    $('#w-client-name').text(clientName);
+
                     var sourceValue = 'Не указан';
                     if (contactData.custom_fields_values) {
                       var sourceField = contactData.custom_fields_values.find(function(field) {
@@ -135,23 +152,33 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
                         sourceValue = sourceField.values[0].value;
                       }
                     }
+
+                    $('#w-client-source').text(sourceValue);
+
                     self.log.info('ID контакта:', contactData.id);
                     self.log.info('Имя контакта:', contactData.name);
                     self.log.info('Источник контакта:', sourceValue);
 
                   }).fail(function(err){
                     self.log.error('Ошибка при запросе контакта:', err);
+                    $('#w-client-name').text('Ошибка загрузки');
+                    $('#w-client-source').text('-');
                   })
                 } else {
                   self.log.warn('У этой сделки нет привязанных контактов.');
+                  $('#w-client-name').text('Нет контакта');
+                  $('#w-client-source').text('-');
                 }
 
               }).fail(function (err) {
                 self.log.error('Ошибка AJAX:', err);
+                $('#w-deal-name').text('Ошибка AJAX');
+                $('#w-deal-price').text('-');
               });
 
           } else{
             self.log.warn('Режим создания новой сделки. Данные недоступны.');
+            $('#w-deal-name').text('Новая сделка');
           }
         } else{
           self.log.warn('Виджет запущен вне контекста карточки сделки');

@@ -1,4 +1,36 @@
-<div class="discount-widget-body">
-    Привет! Я виджет скидок (загружен через Twig).
-    <p>Здесь скоро появятся данные сделки.</p>
+<div class="promotions-widget">
+    <div class="widget-header">
+        <div class="widget-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="5" x2="5" y2="19"></line>
+                <circle cx="6.5" cy="6.5" r="2.5"></circle>
+                <circle cx="17.5" cy="17.5" r="2.5"></circle>
+            </svg>
+        </div>
+        <h1 class="widget-title">Акции для сделки</h1>
+    </div>
+
+    <!-- Строка 1: Сделка -->
+    <div class="widget-row">
+        <div class="widget-label">Сделка:</div>
+        <div class="widget-value" id="w-deal-name">{{ deal_name|default('Загрузка...') }}</div>
+    </div>
+
+    <!-- Строка 2: Текущий бюджет -->
+    <div class="widget-row">
+        <div class="widget-label">Текущий бюджет:</div>
+        <div class="widget-value" id="w-deal-price">{{ deal_price|default('...') }} ₽</div>
+    </div>
+
+    <!-- Строка 3: Клиент -->
+    <div class="widget-row">
+        <div class="widget-label">Клиент:</div>
+        <div class="widget-value" id="w-client-name">{{ client_name|default('...') }}</div>
+    </div>
+
+    <!-- Строка 4: Источник -->
+    <div class="widget-row">
+        <div class="widget-label">Источник:</div>
+        <div class="widget-value" id="w-client-source">{{ client_source|default('...') }}</div>
+    </div>
 </div>

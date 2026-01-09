@@ -1,3 +1,50 @@
 .discount-widget-caption {
     background-color: #ffffff;
 }
+
+.card-widgets__widget__body.js-body-hide{
+    background-color: #ffffff;
+}
+
+.promotions-widget {
+    /* Flexbox позволяет управлять расположением элементов внутри */
+    display: flex;
+    /* column означает, что элементы идут друг под другом (сверху вниз) */
+    flex-direction: column; 
+    /* gap - это расстояние (отступ) между элементами внутри. 1rem = 16px */
+    gap: 1rem; 
+    
+    /* Убираем стандартные отступы самого виджета, чтобы всё было ровно */
+    padding: 0 !important; 
+    margin: 0 !important;
+}
+
+/* Стили для шапки (где иконка и заголовок) */
+.widget-header {
+    margin-top: 15px;
+    display: flex; /* Включаем flexbox */
+    align-items: center; /* Выравниваем элементы по центру по вертикали (чтобы иконка была на одном уровне с текстом) */
+    gap: 0.75rem; /* Расстояние между иконкой и текстом (12px) */
+}
+
+/* Стили для квадратика с иконкой */
+.widget-icon {
+    width: 2rem; /* 32px - ширина */
+    height: 2rem; /* 32px - высота */
+    border-radius: 0.5rem; /* 8px - скругление углов */
+    background: #ff8412; /* Оранжевый цвет фона */
+    color: white; /* Белый цвет самой иконки */
+    
+    /* Центрируем иконку внутри квадратика */
+    display: flex; 
+    justify-content: center; /* По центру горизонтали */
+    align-items: center; /* По центру вертикали */
+}
+
+/* Стили для текста заголовка */
+.widget-title {
+    font-size: 1rem; /* 16px - размер шрифта */
+    font-weight: 600; /* Полужирный текст */
+    color: #111827; /* Темно-серый цвет текста */
+    margin: 0; /* Убираем стандартные отступы браузера у заголовка */
+}

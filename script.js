@@ -60,7 +60,6 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
           body: '<div class="discount-widget-body">Привет! Я виджет скидок.</div>',
           render: ''
         });
-
         return true;
       },
       bind_actions: function() {
@@ -86,6 +85,67 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
 
         if (!self.params.id) {
           self.log.warn('Параметр id не задан — фильтрация логов будет невозможна');
+        }
+
+        if (typeof(APP.data.current_card) != 'undefined' && APP.getWidgetsArea() == 'leads_card'){
+          if (APP.data.current_card.id != 0){
+            self.log.info('Запускаем логику загрузки данных...');
+            var lead_id = APP.data.current_card.id;
+
+            //запрос данных сделки
+            self.$authorizedAjax({
+              url: '/api/v4/leads/' + lead_id,
+              method: 'GET',
+              data: {
+                with: 'contacts'
+              }
+              }).done(function (response) {
+                self.log.info('Данные сделки получены');
+                self.log.debug('Данные сделки:', response);
+
+                var currentLead = response;
+                var dealId = currentLead.id;
+                var dealPrice = currentLead.price;
+                self.log.info('ID сделки:', dealId, 'Бюджет:', dealPrice);
+
+                if (response._embedded && response._embedded.contacts.length > 0){
+                  var contactId = response._embedded.contacts[0].id;
+                   self.log.info('Найден ID контакта:', contactId);
+                  //запрос данных контакта
+                  self.$authorizedAjax({
+                    url: '/api/v4/contacts/' + contactId,
+                    method: 'GET'
+                  }).done(function (contactData) {
+                    self.log.info('Ответ по контакту получен:', contactData);
+                    var sourceValue = 'Не указан';
+                    if (contactData.custom_fields_values) {
+                      var sourceField = contactData.custom_fields_values.find(function(field) {
+                        return field.field_name === 'Источник';
+                      });
+                      if (sourceField && sourceField.values && sourceField.values.length > 0) {
+                        sourceValue = sourceField.values[0].value;
+                      }
+                    }
+                    self.log.info('ID контакта:', contactData.id);
+                    self.log.info('Имя контакта:', contactData.name);
+                    self.log.info('Источник контакта:', sourceValue);
+
+                  }).fail(function(err){
+                    self.log.error('Ошибка при запросе контакта:', err);
+                  })
+                } else {
+                  self.log.warn('У этой сделки нет привязанных контактов.');
+                }
+
+              }).fail(function (err) {
+                self.log.error('Ошибка AJAX:', err);
+              });
+
+          } else{
+            self.log.warn('Режим создания новой сделки. Данные недоступны.');
+          }
+        } else{
+          self.log.warn('Виджет запущен вне контекста карточки сделки');
         }
         return true;
       },

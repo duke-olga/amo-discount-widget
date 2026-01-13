@@ -43,6 +43,84 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       }
     };
 
+
+     this.loadDealData = function(lead_id) {
+      self.log.info('Запускаем логику загрузки данных...');
+      $('#w-deal-name').text('Обновление...');
+      $('#w-deal-price').text('...');
+      $('#w-client-name').text('...');
+      $('#w-client-source').text('...');
+
+      //запрос данных сделки
+      self.$authorizedAjax({
+        url: '/api/v4/leads/' + lead_id,
+        method: 'GET',
+        data: {
+          with: 'contacts'
+        }
+        }).done(function (response) {
+          self.log.info('Данные сделки получены');
+          self.log.debug('Данные сделки:', response);
+          self.dealData = response;
+
+          var currentLead = response;
+          var dealId = currentLead.id;
+          var dealName = response.name || 'Без названия';
+          var dealPrice = currentLead.price;
+          self.log.info('ID сделки:', dealId,'Название сделки:', dealName, 'Бюджет:', dealPrice);
+
+          $('#w-deal-name').text(dealName);
+          $('#w-deal-price').text(dealPrice);
+
+          if (response._embedded && response._embedded.contacts.length > 0){
+            var contactId = response._embedded.contacts[0].id;
+            self.log.info('Найден ID контакта:', contactId);
+            //запрос данных контакта
+            self.$authorizedAjax({
+              url: '/api/v4/contacts/' + contactId,
+              method: 'GET'
+            }).done(function (contactData) {
+              self.log.info('Ответ по контакту получен:', contactData);
+              self.contactData = contactData;
+
+              var clientName = contactData.name || 'Не указан';
+              $('#w-client-name').text(clientName);
+
+              var sourceValue = 'Не указан';
+              if (contactData.custom_fields_values) {
+                var sourceField = contactData.custom_fields_values.find(function(field) {
+                  return field.field_name === 'Источник';
+                });
+                if (sourceField && sourceField.values && sourceField.values.length > 0) {
+                  sourceValue = sourceField.values[0].value;
+                }
+              }
+
+              $('#w-client-source').text(sourceValue);
+
+              self.log.info('ID контакта:', contactData.id);
+              self.log.info('Имя контакта:', contactData.name);
+              self.log.info('Источник контакта:', sourceValue);
+
+            }).fail(function(err){
+              self.log.error('Ошибка при запросе контакта:', err);
+              $('#w-client-name').text('Ошибка загрузки');
+              $('#w-client-source').text('-');
+            })
+          } else {
+            self.log.warn('У этой сделки нет привязанных контактов.');
+            $('#w-client-name').text('Нет контакта');
+            $('#w-client-source').text('-');
+          }
+
+        }).fail(function (err) {
+          self.log.error('Ошибка AJAX:', err);
+          $('#w-deal-name').text('Ошибка AJAX');
+          $('#w-deal-price').text('-');
+        });
+     }
+
+
     this.callbacks = {
       render: function () {
         self.log.info('✓ render callback called');
@@ -79,6 +157,51 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       },
       bind_actions: function() {
         self.log.info('✓ bind_actions callback called');
+        
+        try {
+            // подключаемся к "ушам" родительского окна (Дома)
+            var parentJQuery = window.parent.jQuery;
+            var parentDocument = window.parent.document;
+
+            if (parentJQuery && parentDocument) {
+                self.log.info('Подключаемся к AJAX главного окна...');
+                // вешаем обработчик на родительский документ
+                parentJQuery(parentDocument).on('ajaxComplete.myWidgetUpdate', function(xhr, settings) {
+                    // если объекта settings нет (редкий случай), выходим
+                    if (!settings || !settings.url) return;
+
+                    var url = settings.url;
+                    // URL, при которых нужно обновлять данные
+                    // А) Сохранение сделки
+                    var isDealSave = url.indexOf('/ajax/leads/detail/') !== -1;
+                    // Б) Удаление контакта (что вы нашли: /ajax/linked/leads/remove/)
+                    var isContactRemove = url.indexOf('/ajax/linked/leads/remove/') !== -1;
+                    // В) Добавление контакта (что вы нашли: /private/ajax/contacts/add_person/)
+                    var isContactAdd = url.indexOf('/contacts/add_person/') !== -1;
+
+                    // если совпало ЛЮБОЕ из условий - обновляем виджет
+                    if (isDealSave || isContactRemove || isContactAdd) {
+                        // проверяем, что запрос прошел успешно
+                        if (xhr && xhr.status === 200) {
+                            self.log.info('[AJAX Interceptor] Сработало событие:', url);
+                            self.log.info('[AJAX Interceptor] Обновляем данные виджета...');
+                            // запускаем обновление
+                            var lead_id = APP.data.current_card.id;
+                            if (lead_id && lead_id != 0) {
+                                self.loadDealData(lead_id);
+                            }
+                        }
+                    }
+                });
+
+            } else {
+                self.log.warn('Не удалось получить доступ к главному окну (Parent Window).');
+            }
+
+        } catch (e) {
+            self.log.error('Ошибка при попытке перехвата AJAX родительского окна:', e);
+        }
+
         return true;
       },
       init: function() {
@@ -105,76 +228,8 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
 
         if (typeof(APP.data.current_card) != 'undefined' && APP.getWidgetsArea() == 'leads_card'){
           if (APP.data.current_card.id != 0){
-            self.log.info('Запускаем логику загрузки данных...');
             var lead_id = APP.data.current_card.id;
-
-            //запрос данных сделки
-            self.$authorizedAjax({
-              url: '/api/v4/leads/' + lead_id,
-              method: 'GET',
-              data: {
-                with: 'contacts'
-              }
-              }).done(function (response) {
-                self.log.info('Данные сделки получены');
-                self.log.debug('Данные сделки:', response);
-                self.dealData = response;
-
-                var currentLead = response;
-                var dealId = currentLead.id;
-                var dealName = response.name || 'Без названия';
-                var dealPrice = currentLead.price;
-                self.log.info('ID сделки:', dealId,'Название сделки:', dealName, 'Бюджет:', dealPrice);
-
-                $('#w-deal-name').text(dealName);
-                $('#w-deal-price').text(dealPrice);
-
-                if (response._embedded && response._embedded.contacts.length > 0){
-                  var contactId = response._embedded.contacts[0].id;
-                   self.log.info('Найден ID контакта:', contactId);
-                  //запрос данных контакта
-                  self.$authorizedAjax({
-                    url: '/api/v4/contacts/' + contactId,
-                    method: 'GET'
-                  }).done(function (contactData) {
-                    self.log.info('Ответ по контакту получен:', contactData);
-                    self.contactData = contactData;
-
-                    var clientName = contactData.name || 'Не указан';
-                    $('#w-client-name').text(clientName);
-
-                    var sourceValue = 'Не указан';
-                    if (contactData.custom_fields_values) {
-                      var sourceField = contactData.custom_fields_values.find(function(field) {
-                        return field.field_name === 'Источник';
-                      });
-                      if (sourceField && sourceField.values && sourceField.values.length > 0) {
-                        sourceValue = sourceField.values[0].value;
-                      }
-                    }
-
-                    $('#w-client-source').text(sourceValue);
-
-                    self.log.info('ID контакта:', contactData.id);
-                    self.log.info('Имя контакта:', contactData.name);
-                    self.log.info('Источник контакта:', sourceValue);
-
-                  }).fail(function(err){
-                    self.log.error('Ошибка при запросе контакта:', err);
-                    $('#w-client-name').text('Ошибка загрузки');
-                    $('#w-client-source').text('-');
-                  })
-                } else {
-                  self.log.warn('У этой сделки нет привязанных контактов.');
-                  $('#w-client-name').text('Нет контакта');
-                  $('#w-client-source').text('-');
-                }
-
-              }).fail(function (err) {
-                self.log.error('Ошибка AJAX:', err);
-                $('#w-deal-name').text('Ошибка AJAX');
-                $('#w-deal-price').text('-');
-              });
+            self.loadDealData(lead_id);
 
           } else{
             self.log.warn('Режим создания новой сделки. Данные недоступны.');
@@ -195,7 +250,23 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
       },
       destroy: function () {
         self.log.info('destroy callback called');
-        // ...
+        
+        try {
+            var parentJQuery = window.parent.jQuery;
+            var parentDocument = window.parent.document;
+
+            if (parentJQuery && parentDocument) {
+                // Удаляем обработчик с РОДИТЕЛЬСКОГО документа
+                parentJQuery(parentDocument).off('ajaxComplete.myWidgetUpdate');
+                self.log.info('Слушатель AJAX главного окна удален.');
+            }
+        } catch (e) {
+            self.log.error('Ошибка при удалении слушателя:', e);
+        }
+
+        if (self.subscription) {
+            self.subscription();
+        }
       }
     };
     return this;

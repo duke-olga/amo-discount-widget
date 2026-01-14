@@ -16,27 +16,38 @@
     <div class="card">
         <div class="card-content">
             <!-- Строка 1: Сделка -->
-            <div class="widget-row">
-                <div class="widget-label">Сделка:</div>
-                <div class="widget-value" id="w-deal-name">{{ deal_name|default('Загрузка...') }}</div>
+            <div class="deal-name" id="w-deal-name" title="{{ deal_name }}">
+                {{ deal_name|default('Загрузка...') }}
             </div>
+
+            <!-- Линия-разделитель -->
+            <div class="separator"></div>
 
             <!-- Строка 2: Текущий бюджет -->
             <div class="widget-row">
                 <div class="widget-label">Текущий бюджет:</div>
-                <div class="widget-value" id="w-deal-price">{{ deal_price|default('...') }} ₽</div>
+                <div class="widget-value text-primary font-bold text-lg" id="w-deal-price">
+                    {{ deal_price|default('...') }} ₽
+                </div>
             </div>
 
             <!-- Строка 3: Клиент -->
             <div class="widget-row">
                 <div class="widget-label">Клиент:</div>
-                <div class="widget-value" id="w-client-name">{{ client_name|default('...') }}</div>
+                <div class="widget-value" id="w-client-name">
+                    {{ client_name|default('...') }}
+                </div>
             </div>
 
             <!-- Строка 4: Источник -->
             <div class="widget-row">
                 <div class="widget-label">Источник:</div>
-                <div class="widget-value" id="w-client-source">{{ client_source|default('...') }}</div>
+                <div class="widget-value">
+                    <!-- Бейдж вместо простого текста -->
+                    <span class="badge badge-source" id="w-client-source">
+                        {{ client_source|default('Не указан') }}
+                    </span>
+                </div>
             </div>
 
         </div>

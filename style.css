@@ -43,7 +43,7 @@
 
 /* Стили для текста заголовка */
 .widget-title {
-    font-size: 1rem; /* 16px - размер шрифта */
+    font-size: 1.3rem; /* 16px - размер шрифта */
     font-weight: 600; /* Полужирный текст */
     color: #111827; /* Темно-серый цвет текста */
     margin: 0; /* Убираем стандартные отступы браузера у заголовка */
@@ -84,4 +84,52 @@
     color: #111827;
     font-weight: 500; /* Чуть жирнее обычного */
     text-align: right; /* Прижать к правому краю */
+}
+
+/* --- Бейджи (Цветные таблички) --- */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.125rem 0.5rem; /* 2px по вертикали, 8px по горизонтали */
+    border-radius: 0.25rem; /* 4px скругление углов */
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Синий бейдж для Источника */
+.badge-source {
+    background: #e0f2fe; /* Светло-голубой фон */
+    color: #0369a1; /* Темно-синий текст */
+}
+
+/* --- Размеры и Цвета текста --- */
+
+/* Основной оранжевый цвет (акцент) */
+.text-primary {
+    color: #ff8412;
+}
+
+/* Крупный текст (18px) */
+.text-lg {
+    font-size: 1.11rem;
+}
+
+/* Жирный текст */
+.font-bold {
+    font-weight: 700;
+}
+
+/* --- Дополнительно для структуры карточки --- */
+
+.deal-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 0.75rem; 
+}
+
+/* Разделитель внутри карточки (линия) */
+.separator {
+    border-top: 1px solid #e5e7eb;
+    margin: 0.5rem 0;
 }

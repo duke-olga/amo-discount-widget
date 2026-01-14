@@ -166,7 +166,7 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
             if (parentJQuery && parentDocument) {
                 self.log.info('Подключаемся к AJAX главного окна...');
                 // вешаем обработчик на родительский документ
-                parentJQuery(parentDocument).on('ajaxComplete.myWidgetUpdate', function(xhr, settings) {
+                parentJQuery(parentDocument).on('ajaxComplete.myWidgetUpdate', function(events, xhr, settings) {
                     // если объекта settings нет (редкий случай), выходим
                     if (!settings || !settings.url) return;
 

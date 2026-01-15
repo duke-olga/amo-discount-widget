@@ -248,6 +248,24 @@ define(['jquery', 'underscore', 'twigjs'], function ($, _, Twig) {
         self.log.info('onSave callback called');
         return true;
       },
+      advancedSettings: function () {
+        self.log.info('advancedSettings callback called');
+        $('#page_holder').html('Настройки виджета здесь');
+
+         self.render({
+            href: '/templates/advanced.twig',
+            base_path: self.params.path,
+            v: self.get_version(),       // <--- Добавляем версию для сброса кэша
+            promised: true               // <--- Важно, чтобы работала конструкция .then()
+        }).then(function (template) {    // <--- Обрати внимание: (template) обязателен здесь!
+            
+            // template.render({}) возвращает строку HTML
+            $('#list_page_holder').html(template.render({}));
+            
+        });
+
+        return true;
+      },
       destroy: function () {
         self.log.info('destroy callback called');
         

@@ -43,7 +43,7 @@
 
 /* Стили для текста заголовка */
 .widget-title {
-    font-size: 1.3rem; /* 16px - размер шрифта */
+    font-size: 1rem;
     font-weight: 600; /* Полужирный текст */
     color: #111827; /* Темно-серый цвет текста */
     margin: 0; /* Убираем стандартные отступы браузера у заголовка */
@@ -92,7 +92,7 @@
     align-items: center;
     padding: 0.125rem 0.5rem; /* 2px по вертикали, 8px по горизонтали */
     border-radius: 0.25rem; /* 4px скругление углов */
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 500;
 }
 
@@ -122,7 +122,7 @@
 /* --- Дополнительно для структуры карточки --- */
 
 .deal-name {
-    font-size: 1rem;
+    font-size: 14px;
     font-weight: 600;
     color: #111827;
     margin-bottom: 0.75rem; 
